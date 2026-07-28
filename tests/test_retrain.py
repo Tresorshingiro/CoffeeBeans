@@ -23,6 +23,32 @@ class FakeModel:
         open(path, "w").close()
 
 
+class FineTuneStub:
+    """Stands in for a loaded Keras model so _run_finetune needs no real graph."""
+
+    layers: list = []
+
+    def compile(self, **kwargs):
+        self.compiled = True
+
+    def fit(self, ds, epochs=None, verbose=0, callbacks=None):
+        self.fit_epochs = epochs
+
+
+def _record_loaded_paths(monkeypatch):
+    """Patch load_model to record the path it is asked for. Returns the list."""
+    import tensorflow as tf
+
+    loaded: list[str] = []
+
+    def fake_load_model(path, *args, **kwargs):
+        loaded.append(str(path))
+        return FineTuneStub()
+
+    monkeypatch.setattr(tf.keras.models, "load_model", fake_load_model)
+    return loaded
+
+
 def test_promote_saves_versioned_file_and_registers():
     fake = FakeModel(0.9)
     path = model_module.promote(fake, {"accuracy": 0.871})
@@ -75,6 +101,28 @@ def test_retrain_raises_without_pending_data(monkeypatch):
                         lambda replay_n: ([], [], 0))
     with pytest.raises(ValueError, match="No pending images"):
         model_module.retrain()
+
+
+def test_finetune_starts_from_registered_champion(monkeypatch):
+    # A promoted model lives at a timestamped path, not CHAMPION_PATH. The
+    # second retrain must build on it, or improvements never compound and the
+    # gate compares a baseline-derived candidate against a promoted champion.
+    promoted = config.MODELS_DIR / "coffee_model_20260728_120000.keras"
+    promoted.touch()
+    database.register_model("coffee_model_20260728_120000", str(promoted), 0.88)
+
+    loaded = _record_loaded_paths(monkeypatch)
+    model_module._run_finetune(["a.jpg"], [0], epochs=1, emit=lambda _: None)
+
+    assert loaded == [str(promoted)]
+
+
+def test_finetune_falls_back_to_baseline_when_registry_is_empty(monkeypatch):
+    # Fresh install before register_baseline.py has run.
+    loaded = _record_loaded_paths(monkeypatch)
+    model_module._run_finetune(["a.jpg"], [0], epochs=1, emit=lambda _: None)
+
+    assert loaded == [str(config.CHAMPION_PATH)]
 
 
 def test_progress_callback_receives_lines(monkeypatch):

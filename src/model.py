@@ -106,8 +106,15 @@ def _gather_training_data(replay_n):
 
 
 def _run_finetune(paths, labels, epochs, emit):
-    """Load the champion and continue training from it."""
-    model = tf.keras.models.load_model(config.CHAMPION_PATH)
+    """Load the current champion and continue training from it.
+
+    Resolved through the registry rather than CHAMPION_PATH, so a second
+    retrain builds on the first one's promoted model instead of silently
+    restarting from the original baseline.
+    """
+    path, version = prediction.champion_path()
+    emit(f"Loading champion {version} as the starting point")
+    model = tf.keras.models.load_model(path)
     freeze_batchnorm(model)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(config.RETRAIN_LR),
@@ -176,7 +183,6 @@ def retrain(progress_cb=None, epochs=None, replay_n=None) -> dict:
     n_pending = len(paths) - n_replay
     emit(f"Staged {n_pending} new images, replaying {n_replay} from training set")
 
-    emit("Loading current champion as the starting point")
     model = _run_finetune(paths, labels, epochs, emit)
 
     emit("Evaluating candidate against the held-out test slice")

@@ -37,14 +37,25 @@ def is_ready() -> bool:
     return _model is not None
 
 
+def champion_path() -> tuple[str, str]:
+    """Resolve the reigning champion's (path, version) from the registry.
+
+    Falls back to the shipped baseline when nothing is registered yet, or when
+    the registered file is gone — a Space restart wipes runtime-promoted
+    versions but leaves the registry row behind.
+
+    Serving and retraining both resolve through here so a promoted model is
+    what gets served *and* what the next retrain fine-tunes from.
+    """
+    record = database.get_champion()
+    if record and record["path"] and tf.io.gfile.exists(record["path"]):
+        return record["path"], record["version"]
+    return str(config.CHAMPION_PATH), "coffee_model"
+
+
 def load_champion() -> None:
     """Load the registered champion, falling back to the default path."""
-    record = database.get_champion()
-    path = config.CHAMPION_PATH
-    version = "coffee_model"
-    if record and record["path"] and tf.io.gfile.exists(record["path"]):
-        path = record["path"]
-        version = record["version"]
+    path, version = champion_path()
     model = tf.keras.models.load_model(path)
     set_model(model, version)
 
