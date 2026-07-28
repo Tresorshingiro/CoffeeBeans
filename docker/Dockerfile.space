@@ -23,6 +23,16 @@ COPY data/ ./data/
 COPY docker/nginx.space.conf ./docker/nginx.space.conf
 COPY docker/start.sh ./docker/start.sh
 
+# Arm the promotion gate at build time, not on every boot. Scoring the baseline
+# against the 400-image eval slice takes minutes on a Space's 2 vCPU, and doing
+# it in start.sh means nginx does not bind :7860 until it finishes — the Space
+# sits on "Starting" with nothing to show. Baking data/app.db into the image
+# also means a restart on ephemeral storage comes back with a registered
+# champion instead of an empty registry, where the gate would compare every
+# candidate against 0.0 and promote it regardless of quality.
+# No `|| true` on purpose: an unarmed gate should fail the build, not ship.
+RUN python scripts/register_baseline.py
+
 RUN chmod +x docker/start.sh \
     && mkdir -p /app/data/pending /var/lib/nginx /var/log/nginx \
     && chmod -R 777 /app/data /var/lib/nginx /var/log/nginx

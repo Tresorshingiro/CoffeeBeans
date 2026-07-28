@@ -121,6 +121,18 @@ INTERPRETATIONS = {
 
 
 def main():
+    # The committed insights.json is generated from the full 8,000-image
+    # dataset. Regenerating it from the committed 1,200-image sample would
+    # produce a class-balance chart reading 200 per class while the
+    # interpretation text below still says 1,600 — so refuse to overwrite it
+    # unless the full dataset is actually present. Same guard shape as
+    # scripts/register_baseline.py.
+    if config.INSIGHTS_PATH.exists() and not (config.FULL_DIR / "train").is_dir():
+        print(f"{config.INSIGHTS_PATH} already exists and the full dataset is "
+              "not present — keeping it. Delete the file to force a rebuild "
+              "from whatever data/ currently holds.")
+        return
+
     rng = random.Random(config.SEED)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

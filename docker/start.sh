@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
-# Optional: pull the full dataset if HF_DATA_REPO is configured. Falls back
-# to the committed sample silently.
-python scripts/download_data.py || echo "dataset download skipped"
-python scripts/build_insights.py || echo "insights generation skipped"
-
-# Without this the model registry is empty, the promotion gate compares
-# against 0.0, and any retrained model would be promoted regardless of
-# quality.
-python scripts/register_baseline.py || echo "baseline registration skipped"
+# Nothing is computed here on purpose — every second spent before nginx binds
+# :7860 is a second the Space shows "Starting" with no UI.
+#
+#   - data/insights.json is committed (built from the full 8,000-image set, so
+#     it cannot be regenerated from the committed sample without contradicting
+#     its own interpretation text).
+#   - The champion is registered at image build time; see Dockerfile.space.
+#   - scripts/download_data.py is deliberately not run: the baked baseline was
+#     scored against data/test, and pulling the full dataset at boot would swing
+#     config.test_dir() over to data/full/test, leaving the gate comparing the
+#     champion and its candidates on two different eval slices.
 
 uvicorn api.main:app --host 127.0.0.1 --port 8000 --workers 1 &
 API_PID=$!

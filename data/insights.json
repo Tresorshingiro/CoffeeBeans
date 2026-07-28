@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-07-28T07:11:49.795964+00:00",
+  "class_counts": {
+    "defect": 1600,
+    "longberry": 1600,
+    "peaberry": 1600,
+    "premium": 1600
+  },
+  "channel_means": {
+    "defect": {
+      "r": 151.02,
+      "g": 129.85,
+      "b": 93.78,
+      "brightness": 124.89
+    },
+    "longberry": {
+      "r": 163.12,
+      "g": 143.46,
+      "b": 103.29,
+      "brightness": 136.62
+    },
+    "peaberry": {
+      "r": 145.03,
+      "g": 129.08,
+      "b": 99.27,
+      "brightness": 124.46
+    },
+    "premium": {
+      "r": 150.67,
+      "g": 133.84,
+      "b": 100.89,
+      "brightness": 128.47
+    }
+  },
+  "area_ratios": {
+    "defect": {
+      "mean": 0.2388,
+      "std": 0.0814,
+      "p25": 0.1844,
+      "p75": 0.2883
+    },
+    "longberry": {
+      "mean": 0.2518,
+      "std": 0.0553,
+      "p25": 0.2188,
+      "p75": 0.2713
+    },
+    "peaberry": {
+      "mean": 0.2052,
+      "std": 0.0466,
+      "p25": 0.1713,
+      "p75": 0.2253
+    },
+    "premium": {
+      "mean": 0.2683,
+      "std": 0.0878,
+      "p25": 0.2189,
+      "p75": 0.2921
+    }
+  },
+  "interpretations": {
+    "class_balance": "The four classes are exactly balanced at 1,600 training images each. That means plain accuracy is an honest headline metric and no resampling or class weighting is needed \u2014 a skewed dataset would have forced both.",
+    "channel_means": "Measured across the bean pixels only, longberry is clearly the lightest class (brightness 137 against 124-129 for the rest) and leads in all three channels. The revealing part is the bottom of the chart: defect (124.9) and peaberry (124.5) are almost indistinguishable in colour. Whatever separates those two classes, it is not colour \u2014 so the model has to find it in shape.",
+    "area_ratios": "Bean area \u2014 the share of the frame the bean occupies \u2014 supplies exactly what colour could not. Peaberry is the most compact class (0.205) and also the most consistent (std 0.047), while premium is the largest (0.268). So peaberry, which colour could not separate from defect, is cleanly separable by size. Defect meanwhile has the second-widest spread (std 0.081) and sits mid-range on both measures.",
+    "story": "Read together, the two feature charts predicted the model's weakness before training ran. Every other class owns a distinctive corner of the feature space: longberry is the lightest, peaberry the smallest and most consistent, premium the largest. Defect owns nothing \u2014 it sits mid-range in colour and mid-range in area, with wide variance in both, so it overlaps all three neighbours. That is precisely what the confusion matrix went on to show: defect had the lowest recall of any class at 0.767, against longberry's 0.930. The data said where the model would struggle, and it struggled there."
+  }
+}

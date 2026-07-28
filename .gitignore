@@ -13,7 +13,11 @@ data/pending/
 data/app.db
 data/app.db-wal
 data/app.db-shm
-data/insights.json
+
+# data/insights.json is deliberately NOT ignored: it is generated from the full
+# 8,000-image dataset (which is), so it cannot be regenerated from the
+# committed sample without contradicting its own interpretation text. Committing
+# it also means the Insights page works on a fresh clone with no setup step.
 
 # Retrained model versions produced at runtime
 models/coffee_model_*.keras
@@ -22,9 +26,16 @@ models/coffee_model_*.keras
 # artifact the notebook produced, and it carries exactly the weights inside
 # coffee_model.keras (verified identical).
 
-# Load test output
-locust/results/
+# locust/results/ is deliberately NOT ignored: the CSVs are the raw evidence
+# behind the flood-request table in the README.
 
-.env 
+# Secrets
+.env
+.env.*
+
+# Editors
+.vscode/
+.idea/
+
 .ipynb_checkpoints/
 data/app.db-journal
