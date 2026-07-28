@@ -1,0 +1,31 @@
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    TF_CPP_MIN_LOG_LEVEL=2 \
+    API_BASE=http://127.0.0.1:8000 \
+    HOME=/app
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        nginx libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ ./src/
+COPY api/ ./api/
+COPY ui/ ./ui/
+COPY scripts/ ./scripts/
+COPY models/ ./models/
+COPY data/ ./data/
+COPY docker/nginx.space.conf ./docker/nginx.space.conf
+COPY docker/start.sh ./docker/start.sh
+
+RUN chmod +x docker/start.sh \
+    && mkdir -p /app/data/pending /var/lib/nginx /var/log/nginx \
+    && chmod -R 777 /app/data /var/lib/nginx /var/log/nginx
+
+EXPOSE 7860
+CMD ["./docker/start.sh"]

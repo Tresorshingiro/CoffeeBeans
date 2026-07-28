@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+
+# Full dataset — fetched by scripts/download_data.py
+data/full/
+
+# Runtime state
+data/pending/
+data/app.db
+data/app.db-wal
+data/app.db-shm
+data/insights.json
+
+# Retrained model versions produced at runtime
+models/coffee_model_*.keras
+
+# models/best.weights.h5 is deliberately NOT ignored: it is the best-checkpoint
+# artifact the notebook produced, and it carries exactly the weights inside
+# coffee_model.keras (verified identical).
+
+# Load test output
+locust/results/
+
+.env 
+.ipynb_checkpoints/
+data/app.db-journal

@@ -1,0 +1,37 @@
+# Format 2.4 is required: docker-compose 1.29.2 ignores v3's
+# deploy.resources.limits outside swarm, so CPU pinning would do nothing
+# and the load-test scaling comparison would be meaningless.
+version: "2.4"
+
+services:
+  api:
+    build: .
+    cpus: 1.0
+    mem_limit: 1500m
+    environment:
+      TF_NUM_INTRAOP_THREADS: "1"
+      TF_NUM_INTEROP_THREADS: "1"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+
+  ui:
+    build: .
+    command: streamlit run ui/app.py --server.port 8501 --server.address 0.0.0.0
+    environment:
+      API_BASE: http://api:8000
+    volumes:
+      - ./ui:/app/ui
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:1.27-alpine
+    # 8080 is commonly taken (Tomcat, other dev servers); 8090 avoids the clash.
+    ports:
+      - "8090:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - ui

@@ -1,0 +1,15 @@
+.git/
+.venv/
+.pytest_cache/
+__pycache__/
+**/__pycache__/
+data/full/
+data/pending/
+data/app.db*
+# The container loads the .keras artifact; the SavedModel export exists for
+# the repo/graders and would add 20MB to every image for nothing.
+models/coffee_model_tf/
+docs/
+notebook/
+locust/results/
+tests/
