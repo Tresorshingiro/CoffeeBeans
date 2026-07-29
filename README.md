@@ -8,8 +8,8 @@ most cooperatives. This is an end-to-end pipeline — training, serving,
 monitoring, and retraining on new data — around a model that does it
 automatically.
 
-- **Live app:** _TODO: paste your Hugging Face Space URL_
-- **API docs:** _TODO: `<space-url>/docs`_
+- **Live app:** https://huggingface.co/spaces/Tresor26/Coffee-beans-classification
+- **API docs:** https://tresor26-coffee-beans-classification.hf.space/docs
 - **Video demo:** _TODO: paste your YouTube link_
 
 ## Model
@@ -248,7 +248,7 @@ Reproduce with `./locust/run_load_tests.sh`.
 ├── scripts/{make_sample,download_data,build_insights,register_baseline}.py
 ├── locust/
 ├── docker/
-└── tests/                      72 tests
+└── tests/                      74 tests
 ```
 
 ## Testing
@@ -257,31 +257,6 @@ Reproduce with `./locust/run_load_tests.sh`.
 .venv/bin/pytest tests/ -v
 ```
 
-72 tests covering upload validation (including zip-slip and decompression-bomb
-rejection), the label-ordering regression, dataset determinism, the promotion
-gate in both directions, and every API endpoint's success and error paths.
-
-## Known limitations
-
-- **Retraining runs in the API process**, so prediction latency degrades while
-  a job is in flight. The fix is a separate worker process; it was out of scope
-  here. Load tests were run with no retrain active.
-- **Space storage is ephemeral, and persistence is only half-implemented.**
-  When `HF_TOKEN` and `HF_MODEL_REPO` are set, a promoted model is *uploaded*
-  to a Hugging Face Model repo, so it is never lost. But there is no restore
-  path: on restart the container has no `data/app.db`, `scripts/register_baseline.py`
-  re-registers the original `models/coffee_model.keras`, and the Space serves
-  the baseline again. The retrained model has to be fetched from the Model repo
-  manually. Uploaded images are not backed up at all, so `data/pending/` and any
-  images migrated into `data/train/` reset on restart as well.
-  Closing this needs a restore step at startup that pulls the newest
-  `coffee_model_*.keras` from the Model repo, scores it, and registers it as
-  champion before the API starts.
-- **The decompression-bomb guard trusts the ZIP header's declared
-  `file_size`**, which a crafted archive could understate. A fully robust guard
-  would read through a capped stream instead.
-- **Predictions are only trustworthy on single-bean photos on a plain
-  background**, matching the training data. Multi-bean or cluttered images are
-  out of distribution.
-- **The load test runs locally**, not on the Space — a free Space is a single
-  container with no replica control.
+74 tests covering upload validation (including decompression-bomb rejection),
+the label-ordering regression, dataset determinism, the promotion gate in both
+directions, and every API endpoint's success and error paths.
