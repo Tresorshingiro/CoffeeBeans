@@ -1,4 +1,3 @@
-"""Model construction, evaluation, retraining, and the promotion gate."""
 import os
 from datetime import datetime
 

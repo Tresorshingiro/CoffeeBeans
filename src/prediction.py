@@ -1,9 +1,3 @@
-"""Champion model lifecycle and single-image inference.
-
-The model is loaded once at process start and held in a module-level
-reference. Loading per request would dominate latency and invalidate the
-load-test results.
-"""
 import threading
 import time
 
@@ -38,15 +32,6 @@ def is_ready() -> bool:
 
 
 def champion_path() -> tuple[str, str]:
-    """Resolve the reigning champion's (path, version) from the registry.
-
-    Falls back to the shipped baseline when nothing is registered yet, or when
-    the registered file is gone — a Space restart wipes runtime-promoted
-    versions but leaves the registry row behind.
-
-    Serving and retraining both resolve through here so a promoted model is
-    what gets served *and* what the next retrain fine-tunes from.
-    """
     record = database.get_champion()
     if record and record["path"] and tf.io.gfile.exists(record["path"]):
         return record["path"], record["version"]

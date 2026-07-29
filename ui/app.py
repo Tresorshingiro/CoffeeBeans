@@ -41,7 +41,7 @@ except Exception:
     st.sidebar.error("API unreachable")
 
 
-# ── Predict ──────────────────────────────────────────────────────────────
+# ── Predict
 if page == "Predict":
     st.title("Predict a bean grade")
     st.caption("Upload a single close-up photo of one green coffee bean on a "
@@ -70,7 +70,7 @@ if page == "Predict":
                                            name="probability"))
 
 
-# ── Insights ─────────────────────────────────────────────────────────────
+# ── Insights 
 elif page == "Insights":
     st.title("What the data says")
     response = api_get("/api/insights")
@@ -103,7 +103,7 @@ elif page == "Insights":
         st.success(notes["story"])
 
 
-# ── Data & Retrain ───────────────────────────────────────────────────────
+# ── Data & Retrain 
 elif page == "Data & Retrain":
     st.title("Upload data and retrain")
 
@@ -208,7 +208,7 @@ elif page == "Data & Retrain":
             st.caption("No retraining runs yet.")
 
 
-# ── Monitoring ───────────────────────────────────────────────────────────
+# ── Monitoring 
 elif page == "Monitoring":
     st.title("Service and model monitoring")
     if not status:

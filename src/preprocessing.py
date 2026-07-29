@@ -1,4 +1,3 @@
-"""Image decoding, dataset construction, upload staging, replay sampling."""
 import hashlib
 import io
 import random
