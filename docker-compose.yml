@@ -17,9 +17,14 @@ services:
 
   ui:
     build: .
+    # --server.fileWatcherType none: no source edits at runtime, so hot-reload
+    # only costs inotify watches. The UI segfault was pyarrow; see requirements.
     command: streamlit run ui/app.py --server.port 8501 --server.address 0.0.0.0
+      --server.fileWatcherType none
     environment:
       API_BASE: http://api:8000
+      # Turns a bare SIGSEGV into a Python-level traceback in the container log.
+      PYTHONFAULTHANDLER: "1"
     volumes:
       - ./ui:/app/ui
     depends_on:

@@ -3,7 +3,8 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     TF_CPP_MIN_LOG_LEVEL=2 \
     API_BASE=http://127.0.0.1:8000 \
-    HOME=/app
+    HOME=/app \
+    STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
 
 WORKDIR /app
 

@@ -16,10 +16,22 @@ set -e
 uvicorn api.main:app --host 127.0.0.1 --port 8000 --workers 1 &
 API_PID=$!
 
+# fileWatcherType none: nothing edits source at runtime in a container, so
+# hot-reload only costs inotify watches. (This is not what fixed the UI
+# segfault — that was pyarrow; see requirements.txt.)
+# XSRF/CORS off: a Space is served from <name>.hf.space but embedded in an
+# iframe on huggingface.co, so the cross-site XSRF cookie never reaches
+# streamlit and every POST to /_stcore/upload_file comes back 403 — which
+# breaks both the bean uploader and the retraining ZIP upload. Only the Space
+# needs this; served directly (docker-compose on :8090) the origin matches and
+# the default protection works, so it stays on there.
 streamlit run ui/app.py \
     --server.port 8501 \
     --server.address 127.0.0.1 \
     --server.headless true \
+    --server.fileWatcherType none \
+    --server.enableXsrfProtection false \
+    --server.enableCORS false \
     --browser.gatherUsageStats false &
 UI_PID=$!
 

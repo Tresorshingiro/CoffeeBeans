@@ -3,6 +3,17 @@ fastapi==0.115.6
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
 streamlit==1.41.1
+# pyarrow and pandas arrive transitively via streamlit, but are pinned here on
+# purpose. streamlit 1.41.1 only asks for pyarrow>=7.0, so a fresh install
+# resolves to whatever is newest — and pyarrow 25.0.0 segfaults inside
+# pyarrow.pandas_compat.convert_column whenever streamlit converts a DataFrame
+# for a chart. That killed the UI process on the first Insights page load,
+# locally and on the Space, while the API kept serving and nginx returned 502s
+# for the UI alone. 18.1.0 is contemporaneous with this streamlit release and
+# renders every page cleanly. pandas is also imported directly by ui/app.py, so
+# it belongs in this file regardless of what streamlit drags in.
+pyarrow==18.1.0
+pandas==2.3.3
 requests==2.32.3
 pillow==11.1.0
 numpy==2.1.3

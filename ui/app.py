@@ -12,8 +12,8 @@ st.set_page_config(page_title="Coffee Bean Grading", page_icon="☕",
                    layout="wide")
 
 
-def api_get(path, **kwargs):
-    return requests.get(f"{API_BASE}{path}", timeout=120, **kwargs)
+def api_get(path, timeout=120, **kwargs):
+    return requests.get(f"{API_BASE}{path}", timeout=timeout, **kwargs)
 
 
 def api_post(path, **kwargs):
@@ -227,8 +227,13 @@ elif page == "Monitoring":
         st.subheader("Evaluation in production")
         st.caption("The deployed model scored against the held-out test set.")
         if st.button("Run evaluation"):
-            with st.spinner("Evaluating…"):
-                response = api_get("/api/metrics")
+            # Scores the whole test set on one pinned CPU: ~104s for the 1,600
+            # images a local bind-mounted data/full exposes, so the default
+            # 120s read timeout leaves no headroom once the sidebar's status
+            # polling competes for the same worker. nginx already allows 900s.
+            with st.spinner("Evaluating the deployed model on the full test "
+                            "set — this takes a minute or two…"):
+                response = api_get("/api/metrics", timeout=600)
             if response.status_code != 200:
                 show_error(response)
             else:
