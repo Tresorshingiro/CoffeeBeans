@@ -10,7 +10,7 @@ automatically.
 
 - **Live app:** https://huggingface.co/spaces/Tresor26/Coffee-beans-classification
 - **API docs:** https://tresor26-coffee-beans-classification.hf.space/docs
-- **Video demo:** _TODO: paste your YouTube link_
+- **Video demo:** https://youtu.be/O5su4IBWQEE
 
 ## Model
 
